@@ -1,9 +1,9 @@
-/* PagaYa — Service Worker v1.0.0
+/* PagaYa — Service Worker v1.1.0
    - Precarga los recursos estáticos para uso offline
    - Navegación: red primero, con respaldo en caché
    - Recursos propios: caché primero
    - Google Fonts: stale-while-revalidate */
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 const STATIC_CACHE = 'pagaya-static-v' + VERSION;
 const RUNTIME_CACHE = 'pagaya-runtime-v' + VERSION;
 
