@@ -530,10 +530,27 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue)}
 .cat-item,.switch-row,.cat-chips span,.cat-pick button.add{background:var(--bone-flat)}
 .sheet{background:var(--bone)}
 .toast:not(.lvl){background:var(--bone-flat)}
+
+/* v1.6.9 — Botón "Pagar" plano */
+.pay-btn{background:#436999;border:0;border-radius:99px;box-shadow:none;text-shadow:none;transition:background .15s,transform .1s}
+.pay-btn:hover{background:#3d6292;filter:none}
+.pay-btn:active{background:#345a87;transform:scale(.96)}
+
+/* v1.8.0 — Íconos 3D de categorías */
+.ic3d{display:inline-grid;place-items:center;line-height:0;vertical-align:middle}
+.ic3d svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 2px 1.4px rgba(31,42,55,.28)) drop-shadow(0 .5px 0 rgba(255,255,255,.6))}
+.bill-ic .ic3d{width:30px;height:30px}
+.cat-pick button span{display:grid;place-items:center;width:32px;height:32px}
+.cat-pick .ic3d{width:30px;height:30px}
+.cat-item .ci .ic3d{width:26px;height:26px}
+.cat-preview span .ic3d{width:30px;height:30px}
+.emoji-grid .ic3d{width:26px;height:26px}
+.cat-chips .ic3d{width:17px;height:17px;margin-right:2px}
 </style>
 </head>
 <body>
 <canvas id="confetti"></canvas>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fb8ff"/><stop offset="1" stop-color="#2f6fe0"/></linearGradient><linearGradient id="gLB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c8ecff"/><stop offset="1" stop-color="#55aef0"/></linearGradient><linearGradient id="gY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe970"/><stop offset="1" stop-color="#f2b417"/></linearGradient><linearGradient id="gO" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb866"/><stop offset="1" stop-color="#ee6a1c"/></linearGradient><linearGradient id="gR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8070"/><stop offset="1" stop-color="#d6302a"/></linearGradient><linearGradient id="gG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86e391"/><stop offset="1" stop-color="#2c9f44"/></linearGradient><linearGradient id="gP" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bea2ff"/><stop offset="1" stop-color="#6a45d6"/></linearGradient><linearGradient id="gGr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d3dae3"/><stop offset="1" stop-color="#7e8a99"/></linearGradient><linearGradient id="gD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5e6878"/><stop offset="1" stop-color="#2a313c"/></linearGradient><linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dde4ec"/></linearGradient><linearGradient id="gBr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cf925c"/><stop offset="1" stop-color="#8a5229"/></linearGradient><linearGradient id="gT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#73e2d6"/><stop offset="1" stop-color="#1d9e94"/></linearGradient><linearGradient id="gGo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe58f"/><stop offset="1" stop-color="#e0a21f"/></linearGradient><linearGradient id="gCr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffbe6"/><stop offset="1" stop-color="#f6d672"/></linearGradient><linearGradient id="gPe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd9b3"/><stop offset="1" stop-color="#ef9f63"/></linearGradient></defs></svg>
 <div class="toasts" id="toasts"></div>
 
 <div class="wrap">
@@ -669,7 +686,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue)}
       <input id="cName" maxlength="22" placeholder="Ej: Gimnasio, Colegio, Vehículo" autocomplete="off"></div>
     <div class="field"><span class="flabel">Ícono</span>
       <div class="emoji-grid" id="emojiGrid"></div>
-      <input id="cEmoji" maxlength="8" placeholder="…o escribe / pega cualquier emoji" autocomplete="off"></div>
+      <input id="cEmoji" maxlength="8" placeholder="…o escribe / pega un emoji si prefieres" autocomplete="off"></div>
     <div class="field"><span class="flabel">Color</span><div class="color-row" id="colorRow"></div></div>
     <div class="form-actions">
       <button type="button" class="btn" data-close>Cancelar</button>
@@ -696,21 +713,95 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue)}
 /* =========================================================
    PagaYa — Control gamificado de facturas (PWA)
    ========================================================= */
-const APP_VERSION = '1.6.7';
+const APP_VERSION = '1.8.0';
 const STORE_KEY = 'pagaya.data.v1';
 
 const CATS = {
-  energia:{n:'Energía',i:'⚡',c:'#e2ad3e'}, agua:{n:'Agua',i:'💧',c:'#4a7c91'},
-  gas:{n:'Gas',i:'🔥',c:'#e0843a'}, internet:{n:'Internet',i:'🌐',c:'#5083bc'},
-  telefonia:{n:'Telefonía',i:'📱',c:'#6f8fc4'}, arriendo:{n:'Arriendo',i:'🏠',c:'#436999'},
-  tarjetas:{n:'Tarjetas',i:'💳',c:'#c0504d'}, creditos:{n:'Créditos',i:'🏦',c:'#3d8550'},
-  seguros:{n:'Seguros',i:'🛡️',c:'#5fa56c'}, educacion:{n:'Educación',i:'🎓',c:'#c9962a'},
-  suscripciones:{n:'Suscripciones',i:'🎬',c:'#8a6fb8'},
-  netflix:{n:'Netflix',i:'🍿',c:'#c0504d'}, youtube:{n:'YouTube',i:'▶️',c:'#e0843a'},
-  claude:{n:'IA Claude',i:'🤖',c:'#d38a3c'}, tigo:{n:'Tigo',i:'📶',c:'#345a87'},
-  natacion:{n:'Natación',i:'🏊',c:'#4a9cbf'}, nequi:{n:'Nequi',i:'📲',c:'#8a6fb8'},
-  otros:{n:'Otros',i:'📄',c:'#8a97a8'}
+  energia:{n:"Energía",i:'svg:energia',c:'#e2ad3e'},
+  agua:{n:"Agua",i:'svg:agua',c:'#4a7c91'},
+  gas:{n:"Gas",i:'svg:gas',c:'#e0843a'},
+  internet:{n:"Internet",i:'svg:wifi',c:'#5083bc'},
+  telefonia:{n:"Telefonía",i:'svg:celular',c:'#6f8fc4'},
+  arriendo:{n:"Arriendo",i:'svg:casa',c:'#436999'},
+  administracion:{n:"Administración",i:'svg:edificio',c:'#6b7889'},
+  tarjetas:{n:"Tarjetas",i:'svg:tarjeta',c:'#c0504d'},
+  creditos:{n:"Créditos",i:'svg:banco',c:'#3d8550'},
+  seguros:{n:"Seguros",i:'svg:escudo',c:'#5fa56c'},
+  educacion:{n:"Educación",i:'svg:birrete',c:'#c9962a'},
+  suscripciones:{n:"Suscripciones",i:'svg:claqueta',c:'#8a6fb8'},
+  netflix:{n:"Netflix",i:'svg:palomitas',c:'#c0504d'},
+  youtube:{n:"YouTube",i:'svg:play',c:'#e0843a'},
+  musica:{n:"Música",i:'svg:musica',c:'#8a6fb8'},
+  redes:{n:"Redes sociales",i:'svg:chat',c:'#5083bc'},
+  claude:{n:"IA Claude",i:'svg:robot',c:'#d38a3c'},
+  tigo:{n:"Tigo",i:'svg:senal',c:'#345a87'},
+  nequi:{n:"Nequi",i:'svg:pagomovil',c:'#8a6fb8'},
+  natacion:{n:"Natación",i:'svg:nadador',c:'#4a9cbf'},
+  gimnasio:{n:"Gimnasio",i:'svg:pesa',c:'#5b6b7e'},
+  transporte:{n:"Transporte",i:'svg:carro',c:'#c0504d'},
+  combustible:{n:"Combustible",i:'svg:combustible',c:'#e0843a'},
+  salud:{n:"Salud",i:'svg:salud',c:'#c0504d'},
+  mercado:{n:"Mercado",i:'svg:carrito',c:'#e0843a'},
+  mascotas:{n:"Mascotas",i:'svg:mascota',c:'#a8735f'},
+  videojuegos:{n:"Videojuegos",i:'svg:videojuegos',c:'#8a6fb8'},
+  otros:{n:"Otros",i:'svg:carpeta',c:'#8a97a8'}
 };
+const ICONS = {
+  agua:"<circle cx=\"24\" cy=\"24\" r=\"21\" fill=\"url(#gB)\"/><path d=\"M24 9c5 7 10 12.5 10 18a10 10 0 0 1-20 0c0-5.5 5-11 10-18z\" fill=\"url(#gLB)\" stroke=\"#fff\" stroke-opacity=\".55\"/><ellipse cx=\"20\" cy=\"27\" rx=\"2.2\" ry=\"4\" fill=\"#fff\" opacity=\".75\"/><ellipse cx=\"17\" cy=\"10\" rx=\"8\" ry=\"3.5\" fill=\"#fff\" opacity=\".42\"/>",
+  grifo:"<rect x=\"6\" y=\"15\" width=\"24\" height=\"9\" rx=\"4.5\" fill=\"url(#gGr)\"/><rect x=\"24\" y=\"15\" width=\"9\" height=\"16\" rx=\"4.5\" fill=\"url(#gGr)\"/><rect x=\"14\" y=\"9\" width=\"5\" height=\"7\" rx=\"2\" fill=\"url(#gGr)\"/><rect x=\"9\" y=\"6\" width=\"15\" height=\"4.5\" rx=\"2.2\" fill=\"url(#gB)\"/><path d=\"M28.5 34c2 3 3.5 5 3.5 6.5a3.5 3.5 0 0 1-7 0c0-1.5 1.5-3.5 3.5-6.5z\" fill=\"url(#gLB)\"/><rect x=\"8\" y=\"16.5\" width=\"18\" height=\"2.4\" rx=\"1.2\" fill=\"#fff\" opacity=\".5\"/>",
+  energia:"<path d=\"M27 3 9 27h12l-3 18 21-26H27z\" fill=\"url(#gY)\" stroke=\"#e0a106\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/><path d=\"M24.5 8 13.5 24h5\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" opacity=\".65\"/>",
+  enchufe:"<rect x=\"17\" y=\"6\" width=\"4\" height=\"12\" rx=\"2\" fill=\"url(#gGo)\"/><rect x=\"27\" y=\"6\" width=\"4\" height=\"12\" rx=\"2\" fill=\"url(#gGo)\"/><rect x=\"11\" y=\"15\" width=\"26\" height=\"19\" rx=\"6\" fill=\"url(#gGr)\"/><path d=\"M21 34h6v5a3 3 0 0 1-6 0z\" fill=\"url(#gD)\"/><path d=\"M25.5 19l-5 7h4.5l-2.5 5.5 6-7.5h-4.5z\" fill=\"url(#gY)\"/><rect x=\"14\" y=\"17\" width=\"20\" height=\"2.6\" rx=\"1.3\" fill=\"#fff\" opacity=\".45\"/>",
+  gas:"<path d=\"M24 4c3 7 11 11 11 22a11 11 0 0 1-22 0c0-6 4-9 5-14 2 3 3 5 3 8 2-5 3-9 3-16z\" fill=\"url(#gO)\"/><path d=\"M24 22c2 4 6 6 6 11a6 6 0 0 1-12 0c0-3 2-5 3-7 1 1.5 1.5 2.5 1.5 4 1-2.5 1.5-5 1.5-8z\" fill=\"url(#gY)\"/><path d=\"M17.5 19c-1.8 2.6-2.6 5.2-2.6 8\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" fill=\"none\" opacity=\".55\"/>",
+  cilindro:"<rect x=\"19\" y=\"6\" width=\"10\" height=\"7\" rx=\"2\" fill=\"url(#gGr)\"/><rect x=\"13\" y=\"11\" width=\"22\" height=\"32\" rx=\"9\" fill=\"url(#gB)\"/><path d=\"M24 22c2 3 5 5 5 9a5 5 0 0 1-10 0c0-2.5 1.5-4 2.5-6 .8 1 1.2 2 1.2 3.2.8-2 1.3-4 1.3-6.2z\" fill=\"url(#gO)\"/><rect x=\"16\" y=\"15\" width=\"3.5\" height=\"22\" rx=\"1.7\" fill=\"#fff\" opacity=\".4\"/>",
+  wifi:"<path d=\"M6 19a26 26 0 0 1 36 0\" stroke=\"url(#gB)\" stroke-width=\"5.5\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M12.5 26.5a17 17 0 0 1 23 0\" stroke=\"url(#gB)\" stroke-width=\"5.5\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M18.8 33.5a8.5 8.5 0 0 1 10.4 0\" stroke=\"#3f7fe6\" stroke-width=\"5.5\" fill=\"none\" stroke-linecap=\"round\"/><circle cx=\"24\" cy=\"40.5\" r=\"3.6\" fill=\"url(#gB)\"/>",
+  router:"<rect x=\"11\" y=\"6\" width=\"3.5\" height=\"21\" rx=\"1.75\" fill=\"url(#gD)\" transform=\"rotate(-12 12.7 27)\"/><rect x=\"33.5\" y=\"6\" width=\"3.5\" height=\"21\" rx=\"1.75\" fill=\"url(#gD)\" transform=\"rotate(12 35.2 27)\"/><rect x=\"5\" y=\"25\" width=\"38\" height=\"13\" rx=\"5\" fill=\"url(#gB)\"/><circle cx=\"14\" cy=\"31.5\" r=\"2\" fill=\"#ff6b5b\"/><circle cx=\"20\" cy=\"31.5\" r=\"2\" fill=\"#ffd34d\"/><circle cx=\"26\" cy=\"31.5\" r=\"2\" fill=\"#5fd36f\"/><rect x=\"8\" y=\"26.5\" width=\"32\" height=\"2.4\" rx=\"1.2\" fill=\"#fff\" opacity=\".45\"/>",
+  celular:"<rect x=\"13\" y=\"4\" width=\"22\" height=\"40\" rx=\"6\" fill=\"url(#gD)\"/><rect x=\"15.5\" y=\"9\" width=\"17\" height=\"27\" rx=\"2.5\" fill=\"url(#gB)\"/><circle cx=\"24\" cy=\"40\" r=\"1.8\" fill=\"#9aa4b2\"/><rect x=\"21\" y=\"6\" width=\"6\" height=\"1.6\" rx=\".8\" fill=\"#9aa4b2\"/><path d=\"M17 11h7l-7 10z\" fill=\"#fff\" opacity=\".35\"/>",
+  telefono:"<path d=\"M14 6c2-1 4 0 5 2l3 6c1 2 0 4-1.5 5l-2.5 1.5c1.5 4 5 7.5 9 9l1.5-2.5c1-1.5 3-2.5 5-1.5l6 3c2 1 3 3 2 5l-1.5 3.5c-1 2.5-4 4-7 3C21 36 12 27 9 15c-1-3 .5-6 3-7.5z\" fill=\"url(#gG)\"/><path d=\"M12.5 12.5c.3 3 1.2 5.8 2.5 8.5\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" fill=\"none\" opacity=\".55\"/>",
+  casa:"<path d=\"M24 7 6 23v19h36V23z\" fill=\"url(#gW)\"/><path d=\"M24 4 2 23.5l3.2 3.2L24 10.2l18.8 16.5 3.2-3.2z\" fill=\"url(#gR)\"/><rect x=\"19.5\" y=\"29\" width=\"9\" height=\"13\" rx=\"1.5\" fill=\"url(#gBr)\"/><rect x=\"31\" y=\"27\" width=\"6.5\" height=\"6\" rx=\"1\" fill=\"url(#gLB)\"/><rect x=\"10.5\" y=\"27\" width=\"6.5\" height=\"6\" rx=\"1\" fill=\"url(#gLB)\"/>",
+  edificio:"<rect x=\"10\" y=\"5\" width=\"28\" height=\"39\" rx=\"3\" fill=\"url(#gGr)\"/><rect x=\"14\" y=\"10\" width=\"5\" height=\"5\" rx=\"1\" fill=\"url(#gLB)\"/><rect x=\"21.5\" y=\"10\" width=\"5\" height=\"5\" rx=\"1\" fill=\"url(#gLB)\"/><rect x=\"29\" y=\"10\" width=\"5\" height=\"5\" rx=\"1\" fill=\"url(#gLB)\"/><rect x=\"14\" y=\"18\" width=\"5\" height=\"5\" rx=\"1\" fill=\"url(#gLB)\"/><rect x=\"21.5\" y=\"18\" width=\"5\" height=\"5\" rx=\"1\" fill=\"url(#gLB)\"/><rect x=\"29\" y=\"18\" width=\"5\" height=\"5\" rx=\"1\" fill=\"url(#gLB)\"/><rect x=\"14\" y=\"26\" width=\"5\" height=\"5\" rx=\"1\" fill=\"url(#gLB)\"/><rect x=\"21.5\" y=\"26\" width=\"5\" height=\"5\" rx=\"1\" fill=\"url(#gLB)\"/><rect x=\"29\" y=\"26\" width=\"5\" height=\"5\" rx=\"1\" fill=\"url(#gLB)\"/><rect x=\"20\" y=\"34\" width=\"8\" height=\"10\" rx=\"1\" fill=\"url(#gD)\"/><rect x=\"11.5\" y=\"7\" width=\"2.6\" height=\"35\" rx=\"1.3\" fill=\"#fff\" opacity=\".4\"/>",
+  tarjeta:"<rect x=\"3\" y=\"10\" width=\"42\" height=\"28\" rx=\"5\" fill=\"url(#gB)\"/><rect x=\"3\" y=\"16\" width=\"42\" height=\"5\" fill=\"#1f4aa8\" opacity=\".55\"/><rect x=\"8\" y=\"25\" width=\"9\" height=\"7\" rx=\"1.5\" fill=\"url(#gGo)\"/><rect x=\"21\" y=\"29\" width=\"18\" height=\"3\" rx=\"1.5\" fill=\"#fff\" opacity=\".75\"/><rect x=\"6\" y=\"12\" width=\"30\" height=\"2\" rx=\"1\" fill=\"#fff\" opacity=\".4\"/>",
+  banco:"<path d=\"M24 4 4 15v4h40v-4z\" fill=\"url(#gGo)\"/><rect x=\"8\" y=\"21\" width=\"5\" height=\"15\" rx=\"1\" fill=\"url(#gW)\" stroke=\"#cdd5df\"/><rect x=\"17.5\" y=\"21\" width=\"5\" height=\"15\" rx=\"1\" fill=\"url(#gW)\" stroke=\"#cdd5df\"/><rect x=\"26.5\" y=\"21\" width=\"5\" height=\"15\" rx=\"1\" fill=\"url(#gW)\" stroke=\"#cdd5df\"/><rect x=\"35\" y=\"21\" width=\"5\" height=\"15\" rx=\"1\" fill=\"url(#gW)\" stroke=\"#cdd5df\"/><rect x=\"5\" y=\"37\" width=\"38\" height=\"6\" rx=\"1.5\" fill=\"url(#gGr)\"/><circle cx=\"24\" cy=\"12.5\" r=\"2.4\" fill=\"#fff\" opacity=\".8\"/>",
+  escudo:"<path d=\"M24 3 7 9v12c0 11 7.5 19 17 24 9.5-5 17-13 17-24V9z\" fill=\"url(#gB)\"/><path d=\"M15.5 24l6 6 11-12\" stroke=\"#fff\" stroke-width=\"4.5\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M11.5 11.5 23 7.3\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".5\" stroke-linecap=\"round\"/>",
+  birrete:"<path d=\"M12 23v9c0 3 5.5 6 12 6s12-3 12-6v-9l-12 5.5z\" fill=\"url(#gD)\"/><path d=\"M24 8 2 18l22 10 22-10z\" fill=\"url(#gD)\"/><path d=\"M40 19v12\" stroke=\"#e8b52a\" stroke-width=\"2.4\"/><circle cx=\"40\" cy=\"33\" r=\"3\" fill=\"url(#gGo)\"/><path d=\"M9.5 17.5l14.5-6.3\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".35\" stroke-linecap=\"round\"/>",
+  claqueta:"<rect x=\"5\" y=\"19\" width=\"38\" height=\"24\" rx=\"4\" fill=\"url(#gD)\"/><g transform=\"rotate(-10 6 17)\"><rect x=\"5\" y=\"10\" width=\"38\" height=\"8\" rx=\"2\" fill=\"url(#gW)\"/><path d=\"M11 10h6l-4 8H7zM23 10h6l-4 8h-6zM35 10h6l-4 8h-6z\" fill=\"#3a4250\"/></g><path d=\"M20 25v12l11-6z\" fill=\"url(#gR)\"/>",
+  play:"<rect x=\"5\" y=\"7\" width=\"38\" height=\"34\" rx=\"9\" fill=\"url(#gP)\"/><path d=\"M20 16v16l13-8z\" fill=\"#fff\"/><rect x=\"10\" y=\"10.5\" width=\"24\" height=\"3.5\" rx=\"1.7\" fill=\"#fff\" opacity=\".35\"/>",
+  palomitas:"<circle cx=\"13\" cy=\"15\" r=\"5.5\" fill=\"url(#gCr)\" stroke=\"#e9c35a\" stroke-width=\".8\"/><circle cx=\"21\" cy=\"10\" r=\"6\" fill=\"url(#gCr)\" stroke=\"#e9c35a\" stroke-width=\".8\"/><circle cx=\"29\" cy=\"11\" r=\"5.5\" fill=\"url(#gCr)\" stroke=\"#e9c35a\" stroke-width=\".8\"/><circle cx=\"35\" cy=\"16\" r=\"5\" fill=\"url(#gCr)\" stroke=\"#e9c35a\" stroke-width=\".8\"/><circle cx=\"24\" cy=\"17\" r=\"5.5\" fill=\"url(#gCr)\" stroke=\"#e9c35a\" stroke-width=\".8\"/><circle cx=\"17\" cy=\"19\" r=\"4.5\" fill=\"url(#gCr)\" stroke=\"#e9c35a\" stroke-width=\".8\"/><circle cx=\"31\" cy=\"20\" r=\"4.5\" fill=\"url(#gCr)\" stroke=\"#e9c35a\" stroke-width=\".8\"/><path d=\"M9 19h30l-4 25H13z\" fill=\"url(#gW)\"/><path d=\"M14 19h5.5l.8 25h-5.3zM28.5 19H34l-2.6 25h-5.3z\" fill=\"url(#gR)\"/>",
+  robot:"<rect x=\"23\" y=\"4\" width=\"2\" height=\"7\" fill=\"#8a94a3\"/><circle cx=\"24\" cy=\"4.5\" r=\"3\" fill=\"url(#gP)\"/><rect x=\"4\" y=\"19\" width=\"4\" height=\"10\" rx=\"2\" fill=\"url(#gGr)\"/><rect x=\"40\" y=\"19\" width=\"4\" height=\"10\" rx=\"2\" fill=\"url(#gGr)\"/><rect x=\"8\" y=\"10\" width=\"32\" height=\"28\" rx=\"9\" fill=\"url(#gW)\" stroke=\"#d3dae3\"/><rect x=\"12\" y=\"16\" width=\"24\" height=\"13\" rx=\"6.5\" fill=\"url(#gD)\"/><circle cx=\"19\" cy=\"22.5\" r=\"3\" fill=\"#6fd3ff\"/><circle cx=\"29\" cy=\"22.5\" r=\"3\" fill=\"#6fd3ff\"/><rect x=\"18\" y=\"32\" width=\"12\" height=\"2.5\" rx=\"1.2\" fill=\"#9aa4b2\"/>",
+  senal:"<rect x=\"6\" y=\"30\" width=\"7\" height=\"12\" rx=\"2\" fill=\"url(#gB)\"/><rect x=\"7.5\" y=\"31.5\" width=\"1.8\" height=\"8\" rx=\".9\" fill=\"#fff\" opacity=\".45\"/><rect x=\"16\" y=\"22\" width=\"7\" height=\"20\" rx=\"2\" fill=\"url(#gB)\"/><rect x=\"17.5\" y=\"23.5\" width=\"1.8\" height=\"16\" rx=\".9\" fill=\"#fff\" opacity=\".45\"/><rect x=\"26\" y=\"14\" width=\"7\" height=\"28\" rx=\"2\" fill=\"url(#gB)\"/><rect x=\"27.5\" y=\"15.5\" width=\"1.8\" height=\"24\" rx=\".9\" fill=\"#fff\" opacity=\".45\"/><rect x=\"36\" y=\"6\" width=\"7\" height=\"36\" rx=\"2\" fill=\"url(#gB)\"/><rect x=\"37.5\" y=\"7.5\" width=\"1.8\" height=\"32\" rx=\".9\" fill=\"#fff\" opacity=\".45\"/>",
+  pagomovil:"<rect x=\"8\" y=\"4\" width=\"22\" height=\"38\" rx=\"6\" fill=\"url(#gP)\"/><rect x=\"11\" y=\"9\" width=\"16\" height=\"25\" rx=\"2.5\" fill=\"#f3efff\"/><rect x=\"14\" y=\"13\" width=\"10\" height=\"2.4\" rx=\"1.2\" fill=\"#c9b8ff\"/><rect x=\"14\" y=\"18\" width=\"7\" height=\"2.4\" rx=\"1.2\" fill=\"#c9b8ff\"/><circle cx=\"33\" cy=\"32\" r=\"10\" fill=\"url(#gGo)\" stroke=\"#d29512\" stroke-width=\"1.2\"/><text x=\"33\" y=\"36.5\" font-size=\"12\" font-weight=\"900\" text-anchor=\"middle\" fill=\"#a86f00\" font-family=\"Arial,Helvetica,sans-serif\">$</text>",
+  nadador:"<path d=\"M23 28c3-6 9-10 16-9\" stroke=\"#f2a76a\" stroke-width=\"4.5\" fill=\"none\" stroke-linecap=\"round\"/><circle cx=\"17\" cy=\"21\" r=\"5.5\" fill=\"url(#gPe)\"/><path d=\"M11.5 20.5a5.5 5.5 0 0 1 11 0z\" fill=\"url(#gR)\"/><path d=\"M3 33c4 0 4-3 7-3s4 3 7 3 4-3 7-3 4 3 7 3 4-3 7-3 4 3 7 3v10H3z\" fill=\"url(#gB)\"/><path d=\"M3 38c4 0 4-3 7-3s4 3 7 3 4-3 7-3 4 3 7 3 4-3 7-3 4 3 7 3\" stroke=\"#fff\" stroke-width=\"1.5\" fill=\"none\" opacity=\".6\"/>",
+  musica:"<path d=\"M17 11 39 5v6L17 17z\" fill=\"url(#gP)\"/><rect x=\"17\" y=\"11\" width=\"4\" height=\"23\" fill=\"url(#gP)\"/><rect x=\"35\" y=\"5\" width=\"4\" height=\"23\" fill=\"url(#gP)\"/><ellipse cx=\"14\" cy=\"35\" rx=\"7\" ry=\"5.5\" fill=\"url(#gP)\"/><ellipse cx=\"32\" cy=\"29\" rx=\"7\" ry=\"5.5\" fill=\"url(#gP)\"/><ellipse cx=\"12\" cy=\"33\" rx=\"2.6\" ry=\"1.5\" fill=\"#fff\" opacity=\".55\"/><ellipse cx=\"30\" cy=\"27\" rx=\"2.6\" ry=\"1.5\" fill=\"#fff\" opacity=\".55\"/>",
+  chat:"<path d=\"M24 6C13 6 4 13 4 22c0 5 3 9.5 7.5 12.5L10 42l8.5-4.5c1.8.4 3.6.5 5.5.5 11 0 20-7 20-16S35 6 24 6z\" fill=\"url(#gB)\"/><circle cx=\"15\" cy=\"22\" r=\"3\" fill=\"#fff\"/><circle cx=\"24\" cy=\"22\" r=\"3\" fill=\"#fff\"/><circle cx=\"33\" cy=\"22\" r=\"3\" fill=\"#fff\"/><path d=\"M10 15c3-4 8-6 13-6\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".45\" fill=\"none\" stroke-linecap=\"round\"/>",
+  correo:"<rect x=\"4\" y=\"10\" width=\"40\" height=\"28\" rx=\"5\" fill=\"url(#gB)\"/><path d=\"M6 38 20 24M42 38 28 24\" stroke=\"#1f4aa8\" stroke-width=\"1.5\" opacity=\".5\"/><path d=\"M5 12.5h38L24 27.5z\" fill=\"url(#gY)\" stroke=\"#e0a106\" stroke-linejoin=\"round\"/>",
+  recibo:"<path d=\"M9 4h27v38l-4.5-3-4.5 3-4.5-3-4.5 3-4.5-3L9 42z\" fill=\"url(#gW)\" stroke=\"#d5dbe3\"/><text x=\"16\" y=\"19\" font-size=\"12\" font-weight=\"900\" text-anchor=\"middle\" fill=\"#2c9f44\" font-family=\"Arial,Helvetica,sans-serif\">$</text><rect x=\"21\" y=\"11\" width=\"11\" height=\"2.4\" rx=\"1.2\" fill=\"#9fb0c4\"/><rect x=\"21\" y=\"16\" width=\"9\" height=\"2.4\" rx=\"1.2\" fill=\"#9fb0c4\"/><rect x=\"13\" y=\"23\" width=\"19\" height=\"2.4\" rx=\"1.2\" fill=\"#9fb0c4\"/><rect x=\"13\" y=\"28\" width=\"12\" height=\"2.4\" rx=\"1.2\" fill=\"#9fb0c4\"/><circle cx=\"36\" cy=\"36\" r=\"8\" fill=\"url(#gR)\"/><circle cx=\"36\" cy=\"36\" r=\"5.3\" fill=\"#fff\"/><path d=\"M36 32.8V36l2.2 1.4\" stroke=\"#2b313b\" stroke-width=\"1.6\" fill=\"none\" stroke-linecap=\"round\"/>",
+  moneda:"<circle cx=\"24\" cy=\"24\" r=\"20\" fill=\"url(#gGo)\" stroke=\"#d29512\" stroke-width=\"1.5\"/><circle cx=\"24\" cy=\"24\" r=\"15\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\".6\" stroke-width=\"1.5\"/><text x=\"24\" y=\"31\" font-size=\"20\" font-weight=\"900\" text-anchor=\"middle\" fill=\"#a86f00\" font-family=\"Arial,Helvetica,sans-serif\">$</text><ellipse cx=\"16\" cy=\"13\" rx=\"6\" ry=\"3\" fill=\"#fff\" opacity=\".42\"/>",
+  billetera:"<path d=\"M8 13l22-7 4 7z\" fill=\"url(#gGo)\"/><rect x=\"4\" y=\"12\" width=\"38\" height=\"29\" rx=\"6\" fill=\"url(#gBr)\"/><rect x=\"28\" y=\"20\" width=\"16\" height=\"12\" rx=\"4\" fill=\"#94592b\"/><circle cx=\"34\" cy=\"26\" r=\"2.4\" fill=\"url(#gGo)\"/><rect x=\"7.5\" y=\"15.5\" width=\"31\" height=\"22\" rx=\"4\" fill=\"none\" stroke=\"#f3c89a\" stroke-width=\"1\" stroke-dasharray=\"2.5 2\" opacity=\".8\"/>",
+  dinero:"<rect x=\"3\" y=\"12\" width=\"42\" height=\"24\" rx=\"4\" fill=\"url(#gG)\"/><rect x=\"7\" y=\"16\" width=\"34\" height=\"16\" rx=\"2\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\".55\"/><circle cx=\"24\" cy=\"24\" r=\"6.5\" fill=\"#1f8a3a\" opacity=\".5\"/><text x=\"24\" y=\"28.5\" font-size=\"12\" font-weight=\"900\" text-anchor=\"middle\" fill=\"#eaffea\" font-family=\"Arial,Helvetica,sans-serif\">$</text>",
+  carrito:"<path d=\"M12 13h32l-5 17H16z\" fill=\"url(#gO)\"/><path d=\"M3 7h7.5l6.5 26h22\" stroke=\"#e05a12\" stroke-width=\"3.5\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><circle cx=\"19\" cy=\"39\" r=\"4\" fill=\"url(#gD)\"/><circle cx=\"35\" cy=\"39\" r=\"4\" fill=\"url(#gD)\"/><path d=\"M21 17v9M28 17v9M35 17v9\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".6\" stroke-linecap=\"round\"/>",
+  regalo:"<path d=\"M24 17c-3-8-12-9-12-4 0 3 5 4 12 4zM24 17c3-8 12-9 12-4 0 3-5 4-12 4z\" fill=\"url(#gGo)\"/><rect x=\"9\" y=\"26\" width=\"30\" height=\"17\" rx=\"2\" fill=\"url(#gP)\"/><rect x=\"6\" y=\"17\" width=\"36\" height=\"10\" rx=\"2\" fill=\"url(#gP)\"/><rect x=\"21\" y=\"17\" width=\"6\" height=\"26\" fill=\"url(#gGo)\"/><rect x=\"8\" y=\"18.5\" width=\"11\" height=\"2.4\" rx=\"1.2\" fill=\"#fff\" opacity=\".4\"/>",
+  carro:"<path d=\"M6 28l4-10c1-2.5 3-4 6-4h16c3 0 5 1.5 6 4l4 10v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z\" fill=\"url(#gR)\"/><path d=\"M13 19.5c.6-1.5 1.6-2.5 3.5-2.5h15c1.9 0 2.9 1 3.5 2.5l2 5.5H11z\" fill=\"url(#gLB)\"/><rect x=\"8\" y=\"29\" width=\"5\" height=\"3\" rx=\"1.5\" fill=\"#ffe46b\"/><rect x=\"35\" y=\"29\" width=\"5\" height=\"3\" rx=\"1.5\" fill=\"#ffe46b\"/><circle cx=\"14\" cy=\"38\" r=\"5\" fill=\"url(#gD)\"/><circle cx=\"34\" cy=\"38\" r=\"5\" fill=\"url(#gD)\"/><circle cx=\"14\" cy=\"38\" r=\"2\" fill=\"#c9d1db\"/><circle cx=\"34\" cy=\"38\" r=\"2\" fill=\"#c9d1db\"/>",
+  combustible:"<path d=\"M29 16h4l4 5v13a3 3 0 0 1-6 0v-6h-2\" stroke=\"#6b7686\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><rect x=\"7\" y=\"6\" width=\"22\" height=\"35\" rx=\"4\" fill=\"url(#gR)\"/><rect x=\"11\" y=\"10\" width=\"14\" height=\"10\" rx=\"2\" fill=\"url(#gW)\"/><rect x=\"5\" y=\"39\" width=\"26\" height=\"5\" rx=\"2\" fill=\"url(#gD)\"/><rect x=\"9\" y=\"8\" width=\"2.6\" height=\"29\" rx=\"1.3\" fill=\"#fff\" opacity=\".35\"/>",
+  salud:"<rect x=\"5\" y=\"5\" width=\"38\" height=\"38\" rx=\"10\" fill=\"url(#gW)\" stroke=\"#e1e6ec\"/><path d=\"M19 12h10v7h7v10h-7v7H19v-7h-7V19h7z\" fill=\"url(#gR)\"/>",
+  mascota:"<ellipse cx=\"24\" cy=\"32\" rx=\"10\" ry=\"9\" fill=\"url(#gBr)\"/><ellipse cx=\"11.5\" cy=\"20\" rx=\"4.5\" ry=\"5.5\" fill=\"url(#gBr)\"/><ellipse cx=\"19.5\" cy=\"11.5\" rx=\"4.5\" ry=\"5.5\" fill=\"url(#gBr)\"/><ellipse cx=\"28.5\" cy=\"11.5\" rx=\"4.5\" ry=\"5.5\" fill=\"url(#gBr)\"/><ellipse cx=\"36.5\" cy=\"20\" rx=\"4.5\" ry=\"5.5\" fill=\"url(#gBr)\"/><ellipse cx=\"21\" cy=\"29\" rx=\"3.5\" ry=\"2\" fill=\"#fff\" opacity=\".42\"/>",
+  pesa:"<rect x=\"14\" y=\"21.5\" width=\"20\" height=\"5\" rx=\"2\" fill=\"url(#gGr)\"/><rect x=\"2\" y=\"17\" width=\"5\" height=\"14\" rx=\"2\" fill=\"url(#gD)\"/><rect x=\"41\" y=\"17\" width=\"5\" height=\"14\" rx=\"2\" fill=\"url(#gD)\"/><rect x=\"6\" y=\"11\" width=\"8\" height=\"26\" rx=\"3\" fill=\"url(#gD)\"/><rect x=\"34\" y=\"11\" width=\"8\" height=\"26\" rx=\"3\" fill=\"url(#gD)\"/><rect x=\"7.5\" y=\"13\" width=\"2\" height=\"22\" rx=\"1\" fill=\"#fff\" opacity=\".35\"/><rect x=\"35.5\" y=\"13\" width=\"2\" height=\"22\" rx=\"1\" fill=\"#fff\" opacity=\".35\"/>",
+  videojuegos:"<path d=\"M13 14h22c5 0 9 4 9.5 9l.8 8c.5 4.5-4.5 7-7.5 4l-4-4H14.2l-4 4c-3 3-8 .5-7.5-4l.8-8C4 18 8 14 13 14z\" fill=\"url(#gP)\"/><path d=\"M12 20h4v4h4v4h-4v4h-4v-4H8v-4h4z\" fill=\"#fff\"/><circle cx=\"32\" cy=\"23\" r=\"2.6\" fill=\"#ffd34d\"/><circle cx=\"37\" cy=\"28\" r=\"2.6\" fill=\"#5fd36f\"/><rect x=\"10\" y=\"16\" width=\"16\" height=\"2.2\" rx=\"1.1\" fill=\"#fff\" opacity=\".35\"/>",
+  avion:"<path d=\"M44.5 24c0-1.8-1.5-3-3.5-3H30.5L19.5 5h-5l5.5 16H11l-4-5H3.5l2.5 8-2.5 8H7l4-5h9l-5.5 16h5L30.5 27H41c2 0 3.5-1.2 3.5-3z\" fill=\"url(#gO)\"/><path d=\"M33 22.5h8\" stroke=\"#fff\" stroke-width=\"1.8\" opacity=\".55\" stroke-linecap=\"round\"/>",
+  calendario:"<rect x=\"5\" y=\"9\" width=\"38\" height=\"34\" rx=\"5\" fill=\"url(#gW)\" stroke=\"#dfe5ec\"/><path d=\"M5 14a5 5 0 0 1 5-5h28a5 5 0 0 1 5 5v5H5z\" fill=\"url(#gR)\"/><rect x=\"13\" y=\"4\" width=\"4\" height=\"10\" rx=\"2\" fill=\"url(#gD)\"/><rect x=\"31\" y=\"4\" width=\"4\" height=\"10\" rx=\"2\" fill=\"url(#gD)\"/><rect x=\"11\" y=\"24\" width=\"5\" height=\"4\" rx=\"1\" fill=\"#b9c6d6\"/><rect x=\"19.5\" y=\"24\" width=\"5\" height=\"4\" rx=\"1\" fill=\"#b9c6d6\"/><rect x=\"28\" y=\"24\" width=\"5\" height=\"4\" rx=\"1\" fill=\"#b9c6d6\"/><rect x=\"35\" y=\"24\" width=\"5\" height=\"4\" rx=\"1\" fill=\"#b9c6d6\"/><rect x=\"11\" y=\"32\" width=\"5\" height=\"4\" rx=\"1\" fill=\"#b9c6d6\"/><rect x=\"19.5\" y=\"32\" width=\"5\" height=\"4\" rx=\"1\" fill=\"#b9c6d6\"/><rect x=\"28\" y=\"32\" width=\"5\" height=\"4\" rx=\"1\" fill=\"#b9c6d6\"/><rect x=\"35\" y=\"32\" width=\"5\" height=\"4\" rx=\"1\" fill=\"#b9c6d6\"/>",
+  campana:"<rect x=\"22\" y=\"3\" width=\"4\" height=\"5\" rx=\"2\" fill=\"url(#gO)\"/><circle cx=\"24\" cy=\"38.5\" r=\"4\" fill=\"url(#gO)\"/><path d=\"M24 6c-8 0-12 6-12 13v9l-4 6h32l-4-6v-9c0-7-4-13-12-13z\" fill=\"url(#gY)\"/><path d=\"M16.5 15c1-3 3-5 6-6\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".6\" fill=\"none\" stroke-linecap=\"round\"/>",
+  corazon:"<path d=\"M24 42S4 30 4 17A10 10 0 0 1 24 12a10 10 0 0 1 20 5c0 13-20 25-20 25z\" fill=\"url(#gR)\"/><ellipse cx=\"13\" cy=\"16\" rx=\"4\" ry=\"2.4\" fill=\"#fff\" opacity=\".5\" transform=\"rotate(-30 13 16)\"/>",
+  estrella:"<path d=\"M24 4l6 12.5 13.5 2-9.8 9.5 2.3 13.5L24 35l-12 6.5 2.3-13.5L4.5 18.5l13.5-2z\" fill=\"url(#gY)\" stroke=\"#e8a908\" stroke-width=\"1.2\" stroke-linejoin=\"round\"/><path d=\"M19 18.5l4-8\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".55\" stroke-linecap=\"round\"/>",
+  documento:"<path d=\"M10 4h20l10 10v28a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z\" fill=\"url(#gB)\"/><path d=\"M30 4v8a2 2 0 0 0 2 2h8z\" fill=\"#bcd8ff\"/><rect x=\"14\" y=\"20\" width=\"20\" height=\"2.6\" rx=\"1.3\" fill=\"#fff\" opacity=\".9\"/><rect x=\"14\" y=\"26\" width=\"20\" height=\"2.6\" rx=\"1.3\" fill=\"#fff\" opacity=\".9\"/><rect x=\"14\" y=\"32\" width=\"13\" height=\"2.6\" rx=\"1.3\" fill=\"#fff\" opacity=\".9\"/>",
+  candado:"<path d=\"M15 21v-6a9 9 0 0 1 18 0v6\" stroke=\"#8a94a3\" stroke-width=\"4.5\" fill=\"none\"/><rect x=\"9\" y=\"20\" width=\"30\" height=\"24\" rx=\"5\" fill=\"url(#gGo)\"/><circle cx=\"24\" cy=\"30\" r=\"3.2\" fill=\"#6b4a0c\"/><rect x=\"22.6\" y=\"31\" width=\"2.8\" height=\"7\" rx=\"1.4\" fill=\"#6b4a0c\"/><rect x=\"12\" y=\"22.5\" width=\"20\" height=\"2.4\" rx=\"1.2\" fill=\"#fff\" opacity=\".45\"/>",
+  alarma:"<path d=\"M14 40l-3.5 4.5M34 40l3.5 4.5\" stroke=\"#2b313b\" stroke-width=\"3\" stroke-linecap=\"round\"/><circle cx=\"10\" cy=\"10\" r=\"5.5\" fill=\"url(#gR)\"/><circle cx=\"38\" cy=\"10\" r=\"5.5\" fill=\"url(#gR)\"/><circle cx=\"24\" cy=\"27\" r=\"16\" fill=\"url(#gR)\"/><circle cx=\"24\" cy=\"27\" r=\"12\" fill=\"url(#gW)\"/><path d=\"M24 19.5V27l5 3\" stroke=\"#2b313b\" stroke-width=\"2.5\" fill=\"none\" stroke-linecap=\"round\"/>",
+  nube:"<path d=\"M14 38h22a9 9 0 0 0 1-18 12 12 0 0 0-23-3 10.5 10.5 0 0 0 0 21z\" fill=\"url(#gW)\" stroke=\"#d5dde8\"/><path d=\"M24 33v-9m-4 4 4-4 4 4\" stroke=\"#3f7fe6\" stroke-width=\"2.8\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>",
+  llave:"<path d=\"M33 4a10 10 0 0 0-9.4 13.4L6 35a4 4 0 0 0 5.7 5.7l17.6-17.6A10 10 0 0 0 43 14l-6 6-6.5-1.5L29 12l6-6a10 10 0 0 0-2-2z\" fill=\"url(#gGr)\"/><circle cx=\"9.5\" cy=\"37.5\" r=\"1.8\" fill=\"#fff\" opacity=\".7\"/>",
+  carpeta:"<path d=\"M4 12a4 4 0 0 1 4-4h11l4 5h17a4 4 0 0 1 4 4v3H4z\" fill=\"url(#gO)\"/><rect x=\"4\" y=\"17\" width=\"40\" height=\"25\" rx=\"4\" fill=\"url(#gY)\"/><rect x=\"7\" y=\"20\" width=\"34\" height=\"2.4\" rx=\"1.2\" fill=\"#fff\" opacity=\".5\"/>",
+  etiqueta:"<path d=\"M6 8a2 2 0 0 1 2-2h15l19 19a3 3 0 0 1 0 4.2L29.2 42a3 3 0 0 1-4.2 0L6 23z\" fill=\"url(#gT)\"/><circle cx=\"15\" cy=\"15\" r=\"3.5\" fill=\"#fff\"/><path d=\"M11 22 22 11\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".4\" stroke-linecap=\"round\"/>"
+};
+const ICON_EMOJI = {"agua": "💧", "grifo": "🚰", "energia": "⚡", "enchufe": "🔌", "gas": "🔥", "cilindro": "🛢️", "wifi": "📶", "router": "📡", "celular": "📱", "telefono": "📞", "casa": "🏠", "edificio": "🏢", "tarjeta": "💳", "banco": "🏦", "escudo": "🛡️", "birrete": "🎓", "claqueta": "🎬", "play": "▶️", "palomitas": "🍿", "robot": "🤖", "senal": "📶", "pagomovil": "📲", "nadador": "🏊", "musica": "🎵", "chat": "💬", "correo": "✉️", "recibo": "🧾", "moneda": "🪙", "billetera": "👛", "dinero": "💵", "carrito": "🛒", "regalo": "🎁", "carro": "🚗", "combustible": "⛽", "salud": "🏥", "mascota": "🐾", "pesa": "🏋️", "videojuegos": "🎮", "avion": "✈️", "calendario": "📅", "campana": "🔔", "corazon": "❤️", "estrella": "⭐", "documento": "📄", "candado": "🔒", "alarma": "⏰", "nube": "☁️", "llave": "🔧", "carpeta": "📁", "etiqueta": "🏷️"};
+const ICON_KEYS = Object.keys(ICONS);
+function icoHTML(i){ i = String(i||''); if(i.startsWith('svg:')){ const k = i.slice(4); return ICONS[k] ? `<span class="ic3d"><svg viewBox="0 0 48 48" aria-hidden="true">${ICONS[k]}</svg></span>` : '🏷️'; } return esc(i); }
+function icoText(i){ i = String(i||''); return i.startsWith('svg:') ? (ICON_EMOJI[i.slice(4)]||'🏷️') : i; }
 const CURRENCIES = {
   COP:{l:'es-CO',s:'$',n:'Peso colombiano',d:0}, USD:{l:'en-US',s:'US$',n:'Dólar',d:2},
   EUR:{l:'es-ES',s:'€',n:'Euro',d:2}, MXN:{l:'es-MX',s:'$',n:'Peso mexicano',d:2},
@@ -893,7 +984,7 @@ let filter = {status:'todas', cat:'', q:''};
 const catFilter = $('#catFilter');
 function buildCatFilter(){
   const v = catFilter.value, cats = allCats();
-  catFilter.innerHTML = '<option value="">Todas las categorías</option>' + Object.entries(cats).map(([k,c])=>`<option value="${k}">${c.i} ${esc(c.n)}</option>`).join('');
+  catFilter.innerHTML = '<option value="">Todas las categorías</option>' + Object.entries(cats).map(([k,c])=>`<option value="${k}">${icoText(c.i)} ${esc(c.n)}</option>`).join('');
   catFilter.value = cats[v] ? v : '';
   filter.cat = catFilter.value;
 }
@@ -1049,7 +1140,7 @@ function renderList(){
     const c = catOf(b.category), st = statusOf(b), di = dueInfo(b), bm = String(b.dueDate).slice(0,7);
     return `<article class="bill glass st-${st} ${isSoon(b)?'soon':''}" style="--cat:${c.c};animation-delay:${Math.min(i,10)*35}ms" data-id="${b.id}">${b.paid ? `<div class="stamp${b.id===justPaid?' in':''}" aria-hidden="true"><span>Pagado</span></div>` : ''}
       <div class="bill-row">
-        <div class="bill-ic">${c.i}</div>
+        <div class="bill-ic">${icoHTML(c.i)}</div>
         <div class="bill-info">
           <h3 title="${esc(b.name)}">${esc(b.name)}</h3>
           <div class="bill-meta"><span>${esc(c.n)}</span>${b.reference?`<span class="ref" data-act="copy" title="Copiar referencia">Ref: ${esc(b.reference)}</span>`:''}${b.recurring?'<span class="rec">🔁 Mensual</span>':''}${bm!==viewMonth?`<span class="prev">📅 ${monthName(bm,true)} ${bm.slice(0,4)}</span>`:''}</div>
@@ -1104,8 +1195,6 @@ function payBill(id, btn, card){
   navigator.vibrate?.(onTime ? [20,40,30] : 30);
   card.classList.add('paying');
   const after = stats();
-  toast(onTime ? `🎉 ¡${esc(b.name)} pagada a tiempo!` : `✅ ${esc(b.name)} pagada (con retraso)`, onTime?'ok':'');
-  if(b.nextId && b.recurring) setTimeout(()=>toast(`🔁 Creada la del próximo mes (${fmtDate(addMonth(b.dueDate))})`), 700);
   justPaid = b.id; setTimeout(()=>{ renderAll(); justPaid = null; }, 520);
 }
 function undoPay(id){
@@ -1113,7 +1202,7 @@ function undoPay(id){
   b.paid = false; b.paidDate = null;
   for(let i = state.history.length-1; i >= 0; i--){ if(state.history[i].billId === id){ state.history.splice(i,1); break; } }
   if(b.nextId){ const child = state.bills.find(x=>x.id===b.nextId); if(child && !child.paid) state.bills = state.bills.filter(x=>x.id!==child.id); b.nextId = null; }
-  save(); renderAll(); toast('↩ Pago deshecho');
+  save(); renderAll();
 }
 
 /* ---------- Modales ---------- */
@@ -1140,7 +1229,7 @@ function ask(title, msg, okText='Confirmar', icon='⚠️', danger=true){
 let editingId = null, pickedCat = 'energia';
 const catPick = $('#catPick'), fAmount = $('#fAmount');
 function buildCatPick(){
-  catPick.innerHTML = Object.entries(allCats()).map(([k,c])=>`<button type="button" data-cat="${k}" style="--cat:${c.c}"><span>${c.i}</span>${esc(c.n)}</button>`).join('')
+  catPick.innerHTML = Object.entries(allCats()).map(([k,c])=>`<button type="button" data-cat="${k}" style="--cat:${c.c}"><span>${icoHTML(c.i)}</span>${esc(c.n)}</button>`).join('')
     + `<button type="button" class="add" data-newcat style="--cat:#436999"><span>➕</span>Nueva</button>`;
   markCat();
 }
@@ -1185,21 +1274,20 @@ $('#billForm').addEventListener('submit', e=>{
 $('#fab').onclick = () => openForm();
 
 /* ---------- Categorías personalizadas ---------- */
-const EMOJIS = ['🍿','▶️','🤖','📶','🏊','📲','🏋️','🚗','⛽','🅿️','🚌','🏍️','🛒','🍔','☕','🍼','🐶','🐱','💊','🏥','🦷','💇','👕','👟','🎮','🎵','📺','📚','✈️','🏖️','💡','🔧','🧹','🏢','🏪','💼','🎁','❤️','⛪','💵','📦','🌱','🖥️','📞','🚿','🏷️'];
 const COLORS = ['#436999','#5083bc','#4a7c91','#4a9cbf','#3d8550','#5fa56c','#e2ad3e','#e0843a','#c0504d','#8a6fb8'];
-let editingCat = null, catFromForm = false, catIcon = '🏷️', catColor = COLORS[0];
+let editingCat = null, catFromForm = false, catIcon = 'svg:etiqueta', catColor = COLORS[0];
 function firstGlyph(s){
   s = String(s||'').trim(); if(!s) return '';
   try{ if(window.Intl && Intl.Segmenter) return [...new Intl.Segmenter('es',{granularity:'grapheme'}).segment(s)][0].segment; }catch(e){}
   return Array.from(s).slice(0,2).join('');
 }
-$('#emojiGrid').innerHTML = EMOJIS.map(e=>`<button type="button" data-emo="${e}">${e}</button>`).join('');
+$('#emojiGrid').innerHTML = ICON_KEYS.map(k=>`<button type="button" data-emo="svg:${k}" title="${k}">${icoHTML('svg:'+k)}</button>`).join('');
 $('#colorRow').innerHTML = COLORS.map(c=>`<button type="button" data-col="${c}" style="--sw:${c}" aria-label="Color ${c}"></button>`).join('');
 function paintCatForm(){
   $('#emojiGrid').querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.emo===catIcon));
   $('#colorRow').querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.col===catColor));
   $('#catPreview').style.setProperty('--cat', catColor);
-  $('#cpIc').textContent = catIcon;
+  $('#cpIc').innerHTML = icoHTML(catIcon);
   $('#cpName').textContent = $('#cName').value.trim() || 'Mi categoría';
 }
 $('#emojiGrid').addEventListener('click', e=>{ const b = e.target.closest('[data-emo]'); if(!b) return; catIcon = b.dataset.emo; $('#cEmoji').value = ''; paintCatForm(); });
@@ -1211,7 +1299,7 @@ function openCatForm(id, fromForm=false){
   const c = id ? state.customCats.find(x=>x.id===id) : null;
   $('#catFormTitle').textContent = c ? 'Editar categoría' : 'Nueva categoría';
   $('#cName').value = c?.n || ''; $('#cEmoji').value = '';
-  catIcon = c?.i || '🏷️'; catColor = c?.c || COLORS[state.customCats.length % COLORS.length];
+  catIcon = c?.i || 'svg:etiqueta'; catColor = c?.c || COLORS[state.customCats.length % COLORS.length];
   paintCatForm(); openM($('#catModal'));
   setTimeout(()=>$('#cName').focus(), 350);
 }
@@ -1222,7 +1310,7 @@ $('#catForm').addEventListener('submit', e=>{
   if(Object.entries(allCats()).some(([k,c])=>k!==editingCat && c.n.toLowerCase()===n.toLowerCase())){ toast('⚠️ Ya existe una categoría con ese nombre','err'); return $('#cName').focus(); }
   let id = editingCat;
   if(id){ Object.assign(state.customCats.find(x=>x.id===id), {n, i:catIcon, c:catColor}); toast('💾 Categoría actualizada','ok'); }
-  else { id = 'c_' + uid(); state.customCats.push({id, n, i:catIcon, c:catColor}); toast(`${catIcon} Categoría "${esc(n)}" creada`,'ok'); }
+  else { id = 'c_' + uid(); state.customCats.push({id, n, i:catIcon, c:catColor}); toast(`${icoText(catIcon)} Categoría "${esc(n)}" creada`,'ok'); }
   save(); closeM($('#catModal'));
   if(catFromForm) pickedCat = id;
   refreshCats();
@@ -1231,7 +1319,7 @@ async function deleteCat(id){
   const c = state.customCats.find(x=>x.id===id); if(!c) return;
   const used = state.bills.filter(b=>b.category===id).length;
   const msg = used ? `"${c.n}" tiene ${used} ${plural(used,'factura','facturas')}. Pasarán a la categoría "Otros".` : `¿Eliminar la categoría "${c.n}"?`;
-  if(!await ask('Eliminar categoría', msg, 'Eliminar', c.i)) return;
+  if(!await ask('Eliminar categoría', msg, 'Eliminar', icoText(c.i))) return;
   state.bills.forEach(b=>{ if(b.category===id) b.category = 'otros'; });
   state.history.forEach(h=>{ if(h.category===id) h.category = 'otros'; });
   state.customCats = state.customCats.filter(x=>x.id!==id);
@@ -1304,10 +1392,10 @@ function renderSettings(){
     <div class="sec-head"><h2>⚙️ Ajustes</h2><button class="btn" data-set="back" style="padding:8px 14px">← Volver</button></div>
     <div class="set-group glass"><h3>🏷️ Categorías</h3><p>Crea tus propias categorías con ícono y color para organizar tus facturas.</p>
       <div class="cat-sub">Mis categorías (${state.customCats.length})</div>
-      <div class="cat-list">${state.customCats.length ? state.customCats.map(c=>{ const n = state.bills.filter(b=>b.category===c.id).length; return `<div class="cat-item" style="--cat:${c.c}"><span class="ci">${c.i}</span><div><b>${esc(c.n)}</b><small>${n} ${plural(n,'factura','facturas')}</small></div><button class="mini" data-editcat="${c.id}" aria-label="Editar">✏️</button><button class="mini" data-delcat="${c.id}" aria-label="Eliminar">🗑️</button></div>`; }).join('') : '<span class="cat-empty">Aún no has creado categorías propias.</span>'}</div>
+      <div class="cat-list">${state.customCats.length ? state.customCats.map(c=>{ const n = state.bills.filter(b=>b.category===c.id).length; return `<div class="cat-item" style="--cat:${c.c}"><span class="ci">${icoHTML(c.i)}</span><div><b>${esc(c.n)}</b><small>${n} ${plural(n,'factura','facturas')}</small></div><button class="mini" data-editcat="${c.id}" aria-label="Editar">✏️</button><button class="mini" data-delcat="${c.id}" aria-label="Eliminar">🗑️</button></div>`; }).join('') : '<span class="cat-empty">Aún no has creado categorías propias.</span>'}</div>
       <button class="btn btn-primary btn-block" data-set="newcat" style="margin-bottom:16px">➕ Nueva categoría</button>
       <div class="cat-sub">Predeterminadas</div>
-      <div class="cat-chips">${Object.values(CATS).map(c=>`<span>${c.i} ${c.n}</span>`).join('')}</div>
+      <div class="cat-chips">${Object.values(CATS).map(c=>`<span>${icoHTML(c.i)} ${c.n}</span>`).join('')}</div>
     </div>
     <div class="set-group glass"><h3>📊 Reportes y respaldo</h3><p>Exporta tus facturas o guarda una copia de seguridad completa (incluye categorías e historial de pagos).</p>
       <div class="set-btns">
