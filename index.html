@@ -579,6 +579,9 @@ body{background-color:#4a72a3;background-image:linear-gradient(180deg,#4a72a3 0,
 .list .bill.st-pagado:not(.soon):not(.st-vencido){background:linear-gradient(180deg,#f2f9ec 0%,#e7f4df 100%);border-color:#c5e2b4!important}
 .list .bill.st-pagado .bill-foot{border-top-color:#d3e9c6}
 .list .bill.st-pagado .bill-ic{background:#ffffff99}
+
+/* v1.9.0 — Borde verde (más delgado y suave) en facturas pagadas */
+.list .bill.st-pagado:not(.soon):not(.st-vencido),.list .bill.st-pagado{border:1.5px solid #7cba86!important;box-shadow:var(--shadow)}
 </style>
 </head>
 <body>
@@ -746,7 +749,7 @@ body{background-color:#4a72a3;background-image:linear-gradient(180deg,#4a72a3 0,
 /* =========================================================
    PagaYa — Control gamificado de facturas (PWA)
    ========================================================= */
-const APP_VERSION = '1.8.7';
+const APP_VERSION = '1.9.0';
 const STORE_KEY = 'pagaya.data.v1';
 
 const CATS = {
@@ -1184,7 +1187,7 @@ function renderList(){
           <div class="bill-meta"><span>${esc(c.n)}</span>${b.reference?`<span class="ref" data-act="copy" title="Copiar referencia">Ref: ${esc(b.reference)}</span>`:''}${b.recurring?'<span class="rec">🔁 Mensual</span>':''}${bm!==viewMonth?`<span class="prev">📅 ${monthName(bm,true)} ${bm.slice(0,4)}</span>`:''}</div>
           ${b.notes?`<div class="bill-meta">📝 ${esc(b.notes)}</div>`:''}
         </div>
-        <div class="bill-amt"><b>${fmt(b.amount)}</b>${!b.paid && !Number(b.amount) ? '<small class="amt-hint" data-act="edit">✏️ Ingresa el valor</small>' : ''}<span class="badge b-${st}">${STATUS_LABEL[st]}</span></div>
+        <div class="bill-amt"><b>${fmt(b.amount)}</b>${!b.paid && b.pendingAmount ? '<small class="amt-hint" data-act="edit">✏️ Ingresa el valor</small>' : ''}<span class="badge b-${st}">${STATUS_LABEL[st]}</span></div>
       </div>
       <div class="bill-foot">
         <div class="due ${di.c}">${di.t}</div>
@@ -1224,7 +1227,7 @@ function payBill(id, btn, card){
   b.paid = true; b.paidDate = today;
   state.history.push({id:uid(), billId:b.id, name:b.name, category:b.category, amount:Number(b.amount), dueDate:b.dueDate, paidDate:today, paidAt:Date.now(), onTime, daysEarly:early, xp});
   if(b.recurring && !b.nextId){
-    const n = {id:uid(), name:b.name, category:b.category, amount:0, dueDate:addMonth(b.dueDate), reference:b.reference, notes:b.notes, recurring:true, paid:false, paidDate:null, nextId:null, parentId:b.id, createdAt:Date.now()};
+    const n = {id:uid(), name:b.name, category:b.category, amount:0, pendingAmount:true, dueDate:addMonth(b.dueDate), reference:b.reference, notes:b.notes, recurring:true, paid:false, paidDate:null, nextId:null, parentId:b.id, createdAt:Date.now()};
     state.bills.push(n); b.nextId = n.id;
   }
   save();
@@ -1303,7 +1306,7 @@ function openForm(id){
   const b = id ? state.bills.find(x=>x.id===id) : null;
   $('#formTitle').textContent = b ? 'Editar factura' : 'Nueva factura';
   $('#fName').value = b?.name || '';
-  fAmount.value = (b && Number(b.amount)) ? (cur().d===0 ? Number(b.amount).toLocaleString('es-CO') : String(b.amount)) : '';
+  fAmount.value = (b && !b.pendingAmount) ? (cur().d===0 ? Number(b.amount).toLocaleString('es-CO') : String(b.amount)) : '';
   $('#fDue').value = b?.dueDate || defaultDue();
   $('#fRef').value = b?.reference || '';
   $('#fNotes').value = b?.notes || '';
@@ -1317,9 +1320,9 @@ $('#billForm').addEventListener('submit', e=>{
   e.preventDefault();
   const name = $('#fName').value.trim(), amount = parseAmount(fAmount.value), dueDate = $('#fDue').value;
   if(!name){ toast('✏️ Escribe el nombre del servicio','err'); return $('#fName').focus(); }
-  if(!(amount > 0)){ toast('💰 Ingresa un valor mayor a 0','err'); return fAmount.focus(); }
+  if(!(amount >= 0)){ toast('💰 Ingresa un valor válido','err'); return fAmount.focus(); }
   if(!dueDate){ toast('📅 Selecciona la fecha de vencimiento','err'); return $('#fDue').focus(); }
-  const data = {name, amount, dueDate, category:pickedCat, reference:$('#fRef').value.trim(), notes:$('#fNotes').value.trim(), recurring:$('#fRec').checked};
+  const data = {name, amount, pendingAmount:false, dueDate, category:pickedCat, reference:$('#fRef').value.trim(), notes:$('#fNotes').value.trim(), recurring:$('#fRec').checked};
   let bill;
   if(editingId){ bill = state.bills.find(x=>x.id===editingId); Object.assign(bill, data); toast('💾 Factura actualizada','ok'); }
   else { bill = {id:uid(), ...data, paid:false, paidDate:null, nextId:null, createdAt:Date.now()}; state.bills.push(bill); toast('➕ Factura agregada','ok'); }
