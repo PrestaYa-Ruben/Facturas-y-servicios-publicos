@@ -385,7 +385,7 @@ select option{background:#fff;color:var(--navy)}
 body::before{background:#f4f6fa}
 /* Banda azul del encabezado con borde curvo */
 .wrap{position:relative}
-.wrap::before{content:"";position:absolute;left:0;right:0;top:0;height:calc(150px + var(--safe-t));background:linear-gradient(180deg,#4a72a3 0%,#3d6597 100%);border-radius:0 0 34px 34px;z-index:-1}
+.wrap::before{content:"";position:absolute;left:0;right:0;top:0;height:calc(150px + var(--safe-t));background:#4a72a3;border-radius:0 0 34px 34px;z-index:-1}
 .brand h1{color:#fff}
 .brand h1 span{color:#bfe3c4}
 .brand p{color:rgba(255,255,255,.82)}
@@ -546,6 +546,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue)}
 .cat-preview span .ic3d{width:30px;height:30px}
 .emoji-grid .ic3d{width:26px;height:26px}
 .cat-chips .ic3d{width:17px;height:17px;margin-right:2px}
+
+/* v1.8.1 — Sin rebote, barra superior azul sólida y fondo fijo con ventanas abiertas */
+html,body{overscroll-behavior:none;overscroll-behavior-y:none}
+body::after{content:"";position:fixed;top:0;left:0;right:0;height:calc(env(safe-area-inset-top,0px) + 1px);background:#4a72a3;z-index:55;pointer-events:none}
+.overlay{overscroll-behavior:contain;touch-action:none}
+.sheet{overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+.sheet .chips,.sheet .emoji-grid{touch-action:pan-x pan-y}
 </style>
 </head>
 <body>
@@ -713,7 +720,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue)}
 /* =========================================================
    PagaYa — Control gamificado de facturas (PWA)
    ========================================================= */
-const APP_VERSION = '1.8.0';
+const APP_VERSION = '1.8.1';
 const STORE_KEY = 'pagaya.data.v1';
 
 const CATS = {
@@ -1206,8 +1213,25 @@ function undoPay(id){
 }
 
 /* ---------- Modales ---------- */
-function openM(m){ m.classList.add('open'); document.body.style.overflow = 'hidden'; }
-function closeM(m){ m.classList.remove('open'); if(!document.querySelector('.overlay.open')) document.body.style.overflow = ''; }
+/* Bloqueo del fondo mientras hay una ventana abierta (funciona en iPhone) */
+let lockY = 0, scrollLocked = false;
+function lockScroll(){
+  if(scrollLocked) return; scrollLocked = true; lockY = window.scrollY || 0;
+  const s = document.body.style; s.position = 'fixed'; s.top = `-${lockY}px`; s.left = '0'; s.right = '0'; s.width = '100%'; s.overflow = 'hidden';
+}
+function unlockScroll(){
+  if(!scrollLocked) return; scrollLocked = false;
+  const s = document.body.style; s.position = s.top = s.left = s.right = s.width = s.overflow = '';
+  window.scrollTo(0, lockY);
+}
+function openM(m){ m.classList.add('open'); lockScroll(); }
+function closeM(m){ m.classList.remove('open'); if(!document.querySelector('.overlay.open')) unlockScroll(); }
+// Evita que el dedo arrastre el fondo por fuera de la hoja
+document.addEventListener('touchmove', e=>{
+  if(!scrollLocked) return;
+  const sh = e.target.closest && e.target.closest('.overlay.open .sheet');
+  if(!sh) e.preventDefault();
+}, {passive:false});
 document.querySelectorAll('.overlay').forEach(o=>{
   o.addEventListener('mousedown', e=>{ if(e.target === o){ if(o.id==='confirmModal') $('#cCancel').click(); else closeM(o); } });
   o.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click', ()=>closeM(o)));
