@@ -571,6 +571,14 @@ body{background-color:#4a72a3;background-image:linear-gradient(180deg,#4a72a3 0,
 .emoji-grid .ic3d{width:26px;height:26px}
 .cat-chips > span{display:inline-flex;align-items:center;gap:5px}
 .cat-chips .ic3d{width:18px!important;height:18px!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important}
+
+/* v1.8.4 — Aviso para facturas del mes siguiente con valor $0 */
+.amt-hint{display:block;font-size:12px;font-weight:600;color:var(--blue-d);margin-top:4px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+
+/* v1.8.5 — Tarjeta de factura pagada en verde claro (como el fondo del sello) */
+.list .bill.st-pagado:not(.soon):not(.st-vencido){background:linear-gradient(180deg,#f2f9ec 0%,#e7f4df 100%);border-color:#c5e2b4!important}
+.list .bill.st-pagado .bill-foot{border-top-color:#d3e9c6}
+.list .bill.st-pagado .bill-ic{background:#ffffff99}
 </style>
 </head>
 <body>
@@ -738,7 +746,7 @@ body{background-color:#4a72a3;background-image:linear-gradient(180deg,#4a72a3 0,
 /* =========================================================
    PagaYa — Control gamificado de facturas (PWA)
    ========================================================= */
-const APP_VERSION = '1.8.3';
+const APP_VERSION = '1.8.7';
 const STORE_KEY = 'pagaya.data.v1';
 
 const CATS = {
@@ -758,7 +766,7 @@ const CATS = {
   youtube:{n:"YouTube",i:'svg:play',c:'#c0504d'},
   musica:{n:"Música",i:'svg:musica',c:'#8a6fb8'},
   redes:{n:"Redes sociales",i:'svg:chat',c:'#5083bc'},
-  claude:{n:"IA Claude",i:'svg:robot',c:'#d38a3c'},
+  claude:{n:"IA Claude",i:'svg:iasub',c:'#d38a3c'},
   tigo:{n:"Tigo",i:'svg:senal',c:'#345a87'},
   nequi:{n:"Nequi",i:'svg:pagomovil',c:'#8a6fb8'},
   natacion:{n:"Natación",i:'svg:nadador',c:'#4a9cbf'},
@@ -769,6 +777,8 @@ const CATS = {
   mercado:{n:"Mercado",i:'svg:carrito',c:'#e0843a'},
   mascotas:{n:"Mascotas",i:'svg:mascota',c:'#a8735f'},
   videojuegos:{n:"Videojuegos",i:'svg:videojuegos',c:'#8a6fb8'},
+  impuestos:{n:"Impuestos",i:'svg:impuestos',c:'#c0504d'},
+  hijos:{n:"Ayuda hijos",i:'svg:hijos',c:'#e0843a'},
   otros:{n:"Otros",i:'svg:carpeta',c:'#8a97a8'}
 };
 const ICONS = {
@@ -821,9 +831,12 @@ const ICONS = {
   nube:"<path d=\"M14 38h22a9 9 0 0 0 1-18 12 12 0 0 0-23-3 10.5 10.5 0 0 0 0 21z\" fill=\"url(#gW)\" stroke=\"#d5dde8\"/><path d=\"M24 33v-9m-4 4 4-4 4 4\" stroke=\"#3f7fe6\" stroke-width=\"2.8\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>",
   llave:"<path d=\"M33 4a10 10 0 0 0-9.4 13.4L6 35a4 4 0 0 0 5.7 5.7l17.6-17.6A10 10 0 0 0 43 14l-6 6-6.5-1.5L29 12l6-6a10 10 0 0 0-2-2z\" fill=\"url(#gGr)\"/><circle cx=\"9.5\" cy=\"37.5\" r=\"1.8\" fill=\"#fff\" opacity=\".7\"/>",
   carpeta:"<path d=\"M4 12a4 4 0 0 1 4-4h11l4 5h17a4 4 0 0 1 4 4v3H4z\" fill=\"url(#gO)\"/><rect x=\"4\" y=\"17\" width=\"40\" height=\"25\" rx=\"4\" fill=\"url(#gY)\"/><rect x=\"7\" y=\"20\" width=\"34\" height=\"2.4\" rx=\"1.2\" fill=\"#fff\" opacity=\".5\"/>",
-  etiqueta:"<path d=\"M6 8a2 2 0 0 1 2-2h15l19 19a3 3 0 0 1 0 4.2L29.2 42a3 3 0 0 1-4.2 0L6 23z\" fill=\"url(#gT)\"/><circle cx=\"15\" cy=\"15\" r=\"3.5\" fill=\"#fff\"/><path d=\"M11 22 22 11\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".4\" stroke-linecap=\"round\"/>"
+  etiqueta:"<path d=\"M6 8a2 2 0 0 1 2-2h15l19 19a3 3 0 0 1 0 4.2L29.2 42a3 3 0 0 1-4.2 0L6 23z\" fill=\"url(#gT)\"/><circle cx=\"15\" cy=\"15\" r=\"3.5\" fill=\"#fff\"/><path d=\"M11 22 22 11\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".4\" stroke-linecap=\"round\"/>",
+  impuestos:"<path d=\"M9 4h20l10 10v28a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z\" fill=\"url(#gW)\" stroke=\"#d5dbe3\"/><path d=\"M29 4v8a2 2 0 0 0 2 2h8z\" fill=\"#dfe5ec\"/><text x=\"17.5\" y=\"26\" font-size=\"17\" font-weight=\"900\" text-anchor=\"middle\" fill=\"#d6302a\" font-family=\"Arial,Helvetica,sans-serif\">%</text><rect x=\"26\" y=\"17\" width=\"9\" height=\"2.4\" rx=\"1.2\" fill=\"#9fb0c4\"/><rect x=\"26\" y=\"22\" width=\"7\" height=\"2.4\" rx=\"1.2\" fill=\"#9fb0c4\"/><rect x=\"11\" y=\"31\" width=\"14\" height=\"2.4\" rx=\"1.2\" fill=\"#9fb0c4\"/><rect x=\"11\" y=\"36\" width=\"10\" height=\"2.4\" rx=\"1.2\" fill=\"#9fb0c4\"/><circle cx=\"35\" cy=\"36\" r=\"8.5\" fill=\"url(#gGo)\" stroke=\"#d29512\" stroke-width=\"1.2\"/><text x=\"35\" y=\"40.3\" font-size=\"11.5\" font-weight=\"900\" text-anchor=\"middle\" fill=\"#a86f00\" font-family=\"Arial,Helvetica,sans-serif\">$</text>",
+  hijos:"<path d=\"M31 7.2c-1.5-2.6-5.4-1.7-5.4 1.2 0 2.6 5.4 5.6 5.4 5.6s5.4-3 5.4-5.6c0-2.9-3.9-3.8-5.4-1.2z\" fill=\"url(#gR)\"/><rect x=\"7\" y=\"20\" width=\"18\" height=\"24\" rx=\"9\" fill=\"url(#gB)\"/><circle cx=\"16\" cy=\"12\" r=\"6.5\" fill=\"url(#gPe)\"/><rect x=\"26\" y=\"29\" width=\"15\" height=\"15\" rx=\"7.5\" fill=\"url(#gO)\"/><circle cx=\"33.5\" cy=\"23\" r=\"5\" fill=\"url(#gPe)\"/><path d=\"M23 31c1.5 1.2 3 1.6 4.5 1.4\" stroke=\"#f0a066\" stroke-width=\"3\" stroke-linecap=\"round\" fill=\"none\"/><rect x=\"10\" y=\"22.5\" width=\"3\" height=\"16\" rx=\"1.5\" fill=\"#fff\" opacity=\".4\"/><ellipse cx=\"14\" cy=\"9.5\" rx=\"2.5\" ry=\"1.5\" fill=\"#fff\" opacity=\".5\"/>",
+  iasub:"<rect x=\"3\" y=\"6\" width=\"36\" height=\"34\" rx=\"9\" fill=\"url(#gO)\"/><rect x=\"7\" y=\"9\" width=\"26\" height=\"3.4\" rx=\"1.7\" fill=\"#fff\" opacity=\".35\"/><path d=\"M19 13.5c1 6.2 3.3 8.5 9.5 9.5-6.2 1-8.5 3.3-9.5 9.5-1-6.2-3.3-8.5-9.5-9.5 6.2-1 8.5-3.3 9.5-9.5z\" fill=\"#fff\"/><path d=\"M31 11.5c.4 2.4 1.3 3.3 3.7 3.7-2.4.4-3.3 1.3-3.7 3.7-.4-2.4-1.3-3.3-3.7-3.7 2.4-.4 3.3-1.3 3.7-3.7z\" fill=\"#fff\" opacity=\".9\"/><circle cx=\"36.5\" cy=\"36.5\" r=\"9\" fill=\"url(#gG)\" stroke=\"#fff\" stroke-width=\"1.6\"/><path d=\"M32.3 35.6a4.4 4.4 0 0 1 7.6-2.4\" stroke=\"#fff\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M40.7 30.6l.4 3.4-3.3-.6z\" fill=\"#fff\"/><path d=\"M40.7 37.4a4.4 4.4 0 0 1-7.6 2.4\" stroke=\"#fff\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M32.3 42.4l-.4-3.4 3.3.6z\" fill=\"#fff\"/>"
 };
-const ICON_EMOJI = {"agua": "💧", "grifo": "🚰", "energia": "⚡", "enchufe": "🔌", "gas": "🔥", "cilindro": "🛢️", "wifi": "📶", "router": "📡", "celular": "📱", "telefono": "📞", "casa": "🏠", "edificio": "🏢", "tarjeta": "💳", "banco": "🏦", "escudo": "🛡️", "birrete": "🎓", "claqueta": "🎬", "play": "▶️", "palomitas": "🍿", "robot": "🤖", "senal": "📶", "pagomovil": "📲", "nadador": "🏊", "musica": "🎵", "chat": "💬", "correo": "✉️", "recibo": "🧾", "moneda": "🪙", "billetera": "👛", "dinero": "💵", "carrito": "🛒", "regalo": "🎁", "carro": "🚗", "combustible": "⛽", "salud": "🏥", "mascota": "🐾", "pesa": "🏋️", "videojuegos": "🎮", "avion": "✈️", "calendario": "📅", "campana": "🔔", "corazon": "❤️", "estrella": "⭐", "documento": "📄", "candado": "🔒", "alarma": "⏰", "nube": "☁️", "llave": "🔧", "carpeta": "📁", "etiqueta": "🏷️"};
+const ICON_EMOJI = {"agua": "💧", "grifo": "🚰", "energia": "⚡", "enchufe": "🔌", "gas": "🔥", "cilindro": "🛢️", "wifi": "📶", "router": "📡", "celular": "📱", "telefono": "📞", "casa": "🏠", "edificio": "🏢", "tarjeta": "💳", "banco": "🏦", "escudo": "🛡️", "birrete": "🎓", "claqueta": "🎬", "play": "▶️", "palomitas": "🍿", "robot": "🤖", "senal": "📶", "pagomovil": "📲", "nadador": "🏊", "musica": "🎵", "chat": "💬", "correo": "✉️", "recibo": "🧾", "moneda": "🪙", "billetera": "👛", "dinero": "💵", "carrito": "🛒", "regalo": "🎁", "carro": "🚗", "combustible": "⛽", "salud": "🏥", "mascota": "🐾", "pesa": "🏋️", "videojuegos": "🎮", "avion": "✈️", "calendario": "📅", "campana": "🔔", "corazon": "❤️", "estrella": "⭐", "documento": "📄", "candado": "🔒", "alarma": "⏰", "nube": "☁️", "llave": "🔧", "carpeta": "📁", "etiqueta": "🏷️", "impuestos": "🏛️", "hijos": "👨‍👧", "iasub": "✨"};
 const ICON_KEYS = Object.keys(ICONS);
 function icoHTML(i){ i = String(i||''); if(i.startsWith('svg:')){ const k = i.slice(4); return ICONS[k] ? `<span class="ic3d"><svg viewBox="0 0 48 48" aria-hidden="true">${ICONS[k]}</svg></span>` : '🏷️'; } return esc(i); }
 function icoText(i){ i = String(i||''); return i.startsWith('svg:') ? (ICON_EMOJI[i.slice(4)]||'🏷️') : i; }
@@ -1171,7 +1184,7 @@ function renderList(){
           <div class="bill-meta"><span>${esc(c.n)}</span>${b.reference?`<span class="ref" data-act="copy" title="Copiar referencia">Ref: ${esc(b.reference)}</span>`:''}${b.recurring?'<span class="rec">🔁 Mensual</span>':''}${bm!==viewMonth?`<span class="prev">📅 ${monthName(bm,true)} ${bm.slice(0,4)}</span>`:''}</div>
           ${b.notes?`<div class="bill-meta">📝 ${esc(b.notes)}</div>`:''}
         </div>
-        <div class="bill-amt"><b>${fmt(b.amount)}</b><span class="badge b-${st}">${STATUS_LABEL[st]}</span></div>
+        <div class="bill-amt"><b>${fmt(b.amount)}</b>${!b.paid && !Number(b.amount) ? '<small class="amt-hint" data-act="edit">✏️ Ingresa el valor</small>' : ''}<span class="badge b-${st}">${STATUS_LABEL[st]}</span></div>
       </div>
       <div class="bill-foot">
         <div class="due ${di.c}">${di.t}</div>
@@ -1211,7 +1224,7 @@ function payBill(id, btn, card){
   b.paid = true; b.paidDate = today;
   state.history.push({id:uid(), billId:b.id, name:b.name, category:b.category, amount:Number(b.amount), dueDate:b.dueDate, paidDate:today, paidAt:Date.now(), onTime, daysEarly:early, xp});
   if(b.recurring && !b.nextId){
-    const n = {id:uid(), name:b.name, category:b.category, amount:b.amount, dueDate:addMonth(b.dueDate), reference:b.reference, notes:b.notes, recurring:true, paid:false, paidDate:null, nextId:null, parentId:b.id, createdAt:Date.now()};
+    const n = {id:uid(), name:b.name, category:b.category, amount:0, dueDate:addMonth(b.dueDate), reference:b.reference, notes:b.notes, recurring:true, paid:false, paidDate:null, nextId:null, parentId:b.id, createdAt:Date.now()};
     state.bills.push(n); b.nextId = n.id;
   }
   save();
@@ -1290,7 +1303,7 @@ function openForm(id){
   const b = id ? state.bills.find(x=>x.id===id) : null;
   $('#formTitle').textContent = b ? 'Editar factura' : 'Nueva factura';
   $('#fName').value = b?.name || '';
-  fAmount.value = b ? (cur().d===0 ? Number(b.amount).toLocaleString('es-CO') : String(b.amount)) : '';
+  fAmount.value = (b && Number(b.amount)) ? (cur().d===0 ? Number(b.amount).toLocaleString('es-CO') : String(b.amount)) : '';
   $('#fDue').value = b?.dueDate || defaultDue();
   $('#fRef').value = b?.reference || '';
   $('#fNotes').value = b?.notes || '';
